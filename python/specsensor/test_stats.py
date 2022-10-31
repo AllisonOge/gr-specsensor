@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2022 2022 Allison Ogechukwu.
+# Copyright 2022 Allison Ogechukwu.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
