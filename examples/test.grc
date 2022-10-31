@@ -1,6 +1,6 @@
 options:
   parameters:
-    author: ''
+    author: Allison Ogechukwu
     catch_exceptions: 'True'
     category: '[GRC Hier Blocks]'
     cmake_opt: ''
@@ -22,7 +22,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: Not titled yet
+    title: Simple test script
     window_size: (1000,1000)
   states:
     bus_sink: false
@@ -61,7 +61,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [312, 356.0]
+    coordinate: [280, 380.0]
     rotation: 0
     state: true
 - name: analog_sig_source_x_0
@@ -83,7 +83,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [128, 76.0]
+    coordinate: [96, 100.0]
     rotation: 0
     state: true
 - name: analog_sig_source_x_1
@@ -105,7 +105,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [64, 244.0]
+    coordinate: [32, 268.0]
     rotation: 0
     state: true
 - name: blocks_add_xx_0
@@ -123,7 +123,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [488, 224.0]
+    coordinate: [456, 248.0]
     rotation: 0
     state: true
 - name: blocks_add_xx_1
@@ -141,117 +141,21 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [360, 216.0]
+    coordinate: [328, 240.0]
     rotation: 0
     state: true
-- name: blocks_complex_to_mag_squared_0
-  id: blocks_complex_to_mag_squared
+- name: blocks_message_debug_1
+  id: blocks_message_debug
   parameters:
     affinity: ''
     alias: ''
     comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    vlen: '1024'
+    en_uvec: 'True'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1040, 240.0]
-    rotation: 0
-    state: true
-- name: blocks_complex_to_mag_squared_1
-  id: blocks_complex_to_mag_squared
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    vlen: '1024'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1056, 368.0]
-    rotation: 0
-    state: true
-- name: blocks_stream_to_vector_0
-  id: blocks_stream_to_vector
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    num_items: '1024'
-    type: complex
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [584, 240.0]
-    rotation: 0
-    state: true
-- name: blocks_stream_to_vector_1
-  id: blocks_stream_to_vector
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    num_items: '1024'
-    type: complex
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [568, 368.0]
-    rotation: 0
-    state: true
-- name: fft_vxx_0
-  id: fft_vxx
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    fft_size: '1024'
-    forward: 'True'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    nthreads: '1'
-    shift: 'True'
-    type: complex
-    window: window.blackmanharris(1024)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [752, 204.0]
-    rotation: 0
-    state: true
-- name: fft_vxx_1
-  id: fft_vxx
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    fft_size: '1024'
-    forward: 'True'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    nthreads: '1'
-    shift: 'True'
-    type: complex
-    window: window.blackmanharris(1024)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [760, 332.0]
+    coordinate: [976, 328.0]
     rotation: 0
     state: true
 - name: qtgui_freq_sink_x_0
@@ -332,42 +236,39 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [584, 100.0]
+    coordinate: [576, 132.0]
     rotation: 0
     state: true
-- name: specsensor_test_stats_0
-  id: specsensor_test_stats
+- name: specsensor_signal_detector_0
+  id: specsensor_signal_detector
   parameters:
     affinity: ''
     alias: ''
     comment: ''
     fft_len: '1024'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    sensitivity: '0.5'
     signal_edges: (1, 1)
-    sqlite_path: /root/db.sqlite3
-    table_name: SensorML
+    sqlite_path: /home/allisonogechukwu/db.sqlite3
+    table_name: Sensor
     vlen: '32'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1288, 276.0]
+    coordinate: [600, 268.0]
     rotation: 0
     state: true
 
 connections:
 - [analog_noise_source_x_0, '0', blocks_add_xx_0, '1']
-- [analog_noise_source_x_0, '0', blocks_stream_to_vector_1, '0']
 - [analog_sig_source_x_0, '0', blocks_add_xx_1, '0']
 - [analog_sig_source_x_1, '0', blocks_add_xx_1, '1']
-- [blocks_add_xx_0, '0', blocks_stream_to_vector_0, '0']
 - [blocks_add_xx_0, '0', qtgui_freq_sink_x_0, '0']
+- [blocks_add_xx_0, '0', specsensor_signal_detector_0, '0']
 - [blocks_add_xx_1, '0', blocks_add_xx_0, '0']
-- [blocks_complex_to_mag_squared_0, '0', specsensor_test_stats_0, '0']
-- [blocks_complex_to_mag_squared_1, '0', specsensor_test_stats_0, '1']
-- [blocks_stream_to_vector_0, '0', fft_vxx_0, '0']
-- [blocks_stream_to_vector_1, '0', fft_vxx_1, '0']
-- [fft_vxx_0, '0', blocks_complex_to_mag_squared_0, '0']
-- [fft_vxx_1, '0', blocks_complex_to_mag_squared_1, '0']
+- [specsensor_signal_detector_0, channel_state, blocks_message_debug_1, print]
 
 metadata:
   file_format: 1
