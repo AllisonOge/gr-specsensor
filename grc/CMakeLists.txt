@@ -7,5 +7,5 @@
 #
 
 install(FILES
-    specsensor_test_stats.block.yml DESTINATION share/gnuradio/grc/blocks
+    specsensor_signal_detector.block.yml DESTINATION share/gnuradio/grc/blocks
 )

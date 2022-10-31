@@ -21,4 +21,5 @@ except ModuleNotFoundError:
 
 # import any pure python here
 from .test_stats import test_stats
+from .signal_detector import signal_detector
 #

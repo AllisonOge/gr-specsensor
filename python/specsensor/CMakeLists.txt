@@ -22,7 +22,8 @@ add_subdirectory(bindings)
 GR_PYTHON_INSTALL(
     FILES
     __init__.py
-    test_stats.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/specsensor
+    test_stats.py
+    signal_detector.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/specsensor
 )
 
 ########################################################################
@@ -40,3 +41,4 @@ add_custom_target(
           ${PROJECT_BINARY_DIR}/test_modules/gnuradio/specsensor/
 )
 GR_ADD_TEST(qa_test_stats ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_test_stats.py)
+GR_ADD_TEST(qa_signal_detector ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_signal_detector.py)
