@@ -11,14 +11,31 @@ import sqlite3
 from scipy import special
 import numpy as np
 from gnuradio import gr
+import pmt
+import time
+import datetime
 
 
 class test_stats(gr.sync_block):
     """
-    docstring for block test_stats
+    Compute the test stats of an energy detector and decide if
+    signal is present or absent given sensitivity of threshold
+
+    Parameters
+    ----------
+        fft_len: (int) length of FFT
+        vlen: (int) length of vector stream
+        sensitivity: (float) a value between 0 and 1 to determine the sensitivity
+        of the signal detector to the noise floor. Higher values mean lower threshold
+        sqlite_path: (string) path to the sqlite database
+        table_name: (str) name of the table to save the data
+
+    Attributes
+    ----------
     """
 
-    def __init__(self, fft_len: int, vlen: int, sensitivity: float, signal_edges: tuple, sqlite_path: str, table_name: str):
+    def __init__(self, fft_len: int, vlen: int, sensitivity: float, 
+                signal_edges: tuple, sqlite_path: str, table_name: str):
 
         gr.sync_block.__init__(self,
                                name="test_stats",
@@ -36,6 +53,10 @@ class test_stats(gr.sync_block):
         self.sqlite_path = sqlite_path
         self.log = gr.logger("test_stats")
         self.first_run = True
+
+        # register message output port
+        self.message_port_name = "channel_state"
+        self.message_port_register_out(pmt.intern(self.message_port_name))
 
     def connect_client(self):
         try:
@@ -62,7 +83,7 @@ class test_stats(gr.sync_block):
         # noise_pow * (1 + np.sqrt(2/(self.vlen*self.fft_len))*qinv(self.sensitivity))
         def qinv(prob_fa): return np.sqrt(2)*special.erfinv(1 - 2*prob_fa)
         threshold = noise_est * \
-            (1 + np.sqrt(2/(self.vlen*self.fft_len))*qinv(1- self.sensitivity))
+            (1 + np.sqrt(2/(self.vlen*self.fft_len))*qinv(0.1 * self.sensitivity))
         return threshold
 
     def save_sensor_values(self):
@@ -108,14 +129,18 @@ class test_stats(gr.sync_block):
                 channels += f"chan_{i}"
                 placeholders += "?"
 
+        # publish message
+        timestamp = pmt.intern(str(datetime.datetime.now()))
+        PMT_msg = pmt.make_dict()
+        PMT_msg = pmt.dict_add(PMT_msg, timestamp, pmt.to_pmt(list(map(int, decision))))
+        self.message_port_pub(pmt.intern(self.message_port_name), PMT_msg)
+
         try:
             query = f"""insert into {self.table_name} ({channels}) values ({placeholders})"""
             self.cursor.execute(query, list(map(int, decision)))
             self.connect.commit()
         except Exception as err:
             raise err
-
-        # self.log.debug("Save complete")
 
     def work(self, input_items, output_items):
         in0 = input_items[0]
