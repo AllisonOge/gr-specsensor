@@ -236,7 +236,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [576, 132.0]
+    coordinate: [592, 164.0]
     rotation: 0
     state: true
 - name: specsensor_signal_detector_0
@@ -248,11 +248,11 @@ blocks:
     fft_len: '1024'
     maxoutbuf: '0'
     minoutbuf: '0'
-    sensitivity: '0.5'
+    sensitivity: '0.1'
     signal_edges: (1, 1)
-    sqlite_path: /home/allisonogechukwu/db.sqlite3
+    sqlite_path: /root/db.sqlite3
     table_name: Sensor
-    vlen: '32'
+    vlen: '1'
   states:
     bus_sink: false
     bus_source: false

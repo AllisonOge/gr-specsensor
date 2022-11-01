@@ -11,7 +11,6 @@
 from gnuradio.fft import window
 from gnuradio import gr, blocks, analog, fft
 from .test_stats import test_stats
-import pmt
 
 class signal_detector(gr.hier_block2):
     """
