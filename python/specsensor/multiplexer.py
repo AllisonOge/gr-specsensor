@@ -27,6 +27,7 @@ class multiplexer(gr.sync_block):
         # register a message input port
         self.message_port_name = "selector"
         self.message_port_register_in(pmt.intern(self.message_port_name))
+        self.set_msg_handler(pmt.intern(self.message_port_name), self.handle_msg)
 
     def handle_msg(self, msg):
         self.selector = pmt.to_long(msg)
