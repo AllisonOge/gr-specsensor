@@ -23,4 +23,8 @@ except ModuleNotFoundError:
 from .test_stats import test_stats
 from .signal_detector import signal_detector
 from .multiplexer import multiplexer
+from . import cs_methods, utils
+from .cognitive_controller import cognitive_controller
+
+
 #
