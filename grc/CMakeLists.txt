@@ -7,5 +7,6 @@
 #
 
 install(FILES
-    specsensor_signal_detector.block.yml DESTINATION share/gnuradio/grc/blocks
+    specsensor_signal_detector.block.yml
+    specsensor_multiplexer.block.yml DESTINATION share/gnuradio/grc/blocks
 )
