@@ -12,7 +12,6 @@ from scipy import special
 import numpy as np
 from gnuradio import gr
 import pmt
-import time
 import datetime
 
 
@@ -34,8 +33,8 @@ class test_stats(gr.sync_block):
     ----------
     """
 
-    def __init__(self, fft_len: int, vlen: int, sensitivity: float, 
-                signal_edges: tuple, sqlite_path: str, table_name: str):
+    def __init__(self, fft_len: int, vlen: int, sensitivity: float,
+                 signal_edges: tuple, sqlite_path: str, table_name: str):
 
         gr.sync_block.__init__(self,
                                name="test_stats",
@@ -74,16 +73,32 @@ class test_stats(gr.sync_block):
         self.cursor.execute(f"""create table if not exists {self.table_name} (
             id integer primary key autoincrement,
             {channels}
-            created_at timestamp default current_timestamp
+            created_at datetime
          )""")
 
         self.connect.commit()
 
     def build_threshold(self, noise_est):
-        # noise_pow * (1 + np.sqrt(2/(self.vlen*self.fft_len))*qinv(self.sensitivity))
+        """Computes the threshold of the energy detector using the formula
+
+        threshold = noise_pow * (1 + np.sqrt(2/(self.vlen*self.fft_len))*qinv(self.sensitivity))
+
+        This is the threshold formular for a welch periodogram-based energy detector.
+        [1] Martínez, D.M. and Andrade, Á.G., 2013. Performance evaluation of Welch's 
+            periodogram-based energy detection for spectrum sensing. IET Communications, 
+            7(11), pp.1117-1125.
+
+        Parameters
+        ----------
+            noise_est: (any) array of the noise power of the channels
+
+        Returns
+        -------
+            threshold of type based on the input parameter
+        """
         def qinv(prob_fa): return np.sqrt(2)*special.erfinv(1 - 2*prob_fa)
         threshold = noise_est * \
-            (1 + np.sqrt(2/(self.vlen*self.fft_len))*qinv(0.1 * self.sensitivity))
+            (1 + np.sqrt(2/(self.vlen*self.fft_len))*qinv(self.sensitivity))
         return threshold
 
     def save_sensor_values(self):
@@ -130,14 +145,16 @@ class test_stats(gr.sync_block):
                 placeholders += "?"
 
         # publish message
-        timestamp = pmt.intern(str(datetime.datetime.now()))
+        timestamp = datetime.datetime.now()
+        PMT_timestamp = pmt.intern(str(timestamp))
         PMT_msg = pmt.make_dict()
-        PMT_msg = pmt.dict_add(PMT_msg, timestamp, pmt.to_pmt(list(map(int, decision))))
+        PMT_msg = pmt.dict_add(
+            PMT_msg, PMT_timestamp, pmt.to_pmt(list(map(int, decision))))
         self.message_port_pub(pmt.intern(self.message_port_name), PMT_msg)
 
         try:
-            query = f"""insert into {self.table_name} ({channels}) values ({placeholders})"""
-            self.cursor.execute(query, list(map(int, decision)))
+            query = f"""insert into {self.table_name} ({channels}, created_at) values ({placeholders}, ?)"""
+            self.cursor.execute(query, [*list(map(int, decision)), timestamp])
             self.connect.commit()
         except Exception as err:
             raise err
