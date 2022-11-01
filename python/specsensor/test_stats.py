@@ -146,10 +146,10 @@ class test_stats(gr.sync_block):
 
         # publish message
         timestamp = datetime.datetime.now()
-        PMT_timestamp = pmt.intern(str(timestamp))
-        PMT_msg = pmt.make_dict()
-        PMT_msg = pmt.dict_add(
-            PMT_msg, PMT_timestamp, pmt.to_pmt(list(map(int, decision))))
+        message = {
+            str(timestamp): list(map(int, decision))
+        }
+        PMT_msg = pmt.to_pmt(message)
         self.message_port_pub(pmt.intern(self.message_port_name), PMT_msg)
 
         try:
