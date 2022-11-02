@@ -27,7 +27,8 @@ GR_PYTHON_INSTALL(
     multiplexer.py
     cs_methods.py
     utils.py
-    cognitive_controller.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/specsensor
+    cognitive_controller.py
+    set_multiply_const_xx.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/specsensor
 )
 
 ########################################################################
@@ -48,3 +49,4 @@ GR_ADD_TEST(qa_test_stats ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_te
 GR_ADD_TEST(qa_signal_detector ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_signal_detector.py)
 GR_ADD_TEST(qa_multiplexer ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_multiplexer.py)
 GR_ADD_TEST(qa_cognitive_controller ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_cognitive_controller.py)
+GR_ADD_TEST(qa_set_multiply_const_xx ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_set_multiply_const_xx.py)

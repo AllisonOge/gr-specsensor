@@ -25,6 +25,7 @@ from .signal_detector import signal_detector
 from .multiplexer import multiplexer
 from . import cs_methods, utils
 from .cognitive_controller import cognitive_controller
+from .set_multiply_const_xx import set_multiply_const_xx
 
 
 #

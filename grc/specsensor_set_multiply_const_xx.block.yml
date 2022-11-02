@@ -1,0 +1,54 @@
+id: specsensor_set_multiply_const_xx
+label: Set Multiply Constant
+category: 'Spectrum Sensor'
+
+templates:
+  imports: from gnuradio import specsensor
+  make: specsensor.set_multiply_const_xx(${constant}, ${vlen})
+
+#  Make one 'parameters' list entry for every parameter you want settable from the GUI.
+#     Keys include:
+#     * id (makes the value accessible as keyname, e.g. in the make entry)
+#     * label (label shown in the GUI)
+#     * dtype (e.g. int, float, complex, byte, short, xxx_vector, ...)
+#     * default
+parameters:
+- id: type
+  label: IO Type
+  dtype: enum
+  options: [complex, float, int, short]
+  option_attributes:
+      vconst_type: [complex_vector, real_vector, int_vector, int_vector]
+      const_type:  [complex, real, int, int]
+      fcn: [cc, ff, ii, ss]
+  hide: part
+- id: constant
+  label: Constant
+  dtype: ${ type.const_type if vlen == 1 else type.vconst_type }
+  default: '1'
+- id: vlen
+  label: Vector Length
+  dtype: int
+  default: '1'
+  hide: ${ 'part' if vlen == 1 else 'none' }
+
+inputs:
+- domain: stream
+  dtype: ${ type }
+  vlen: ${ vlen }
+- label: constant
+  domain: message
+  optional: true
+
+outputs:
+- domain: stream
+  dtype: ${ type }
+  vlen: ${ vlen }
+
+asserts:
+- ${ vlen > 0 }
+- ${ (vlen > 1 and len(constant) == vlen) or (vlen == 1) }
+
+#  'file_format' specifies the version of the GRC yml format used in the file
+#  and should usually not be changed.
+file_format: 1
