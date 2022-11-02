@@ -44,7 +44,7 @@ outputs:
 - label: trans_mode
   domain: message
   optional: true
-- label: freq
+- label: command
   domain: message
   optional: true
 
