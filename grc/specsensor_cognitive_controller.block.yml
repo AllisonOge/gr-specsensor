@@ -20,7 +20,7 @@ parameters:
   label: Channel Selection Method
   dtype: string
   options: ['random', 'next', 'prev', 'nextstate', 'idletime']
-  option_labels: ['Random', 'Next', 'Previous', 'Next State', 'Idletime']
+  option_labels: ['Random', 'Next', 'Previous', 'Next_State', 'Idletime']
   default: 'Idletime'
 - id: model_path
   label: Model Path

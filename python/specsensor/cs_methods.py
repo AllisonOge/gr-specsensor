@@ -1,5 +1,5 @@
 import random
-import tflite_runtime.interpreter as tflite
+import tensorflow.lite as tflite
 import os
 import numpy as np
 from .utils import start_and_idle_time
@@ -241,7 +241,10 @@ class CS1(ML):
             ----------
 
         """
-        self.occ_sums = [r+channel_state[i]
+        if len(self.occ_sums) <= 0:
+            self.occ_sums = channel_state
+        else:
+            self.occ_sums = [r+channel_state[i]
                          for i, r in enumerate(self.occ_sums)]
         self.counter += 1
         return [o / self.counter for o in self.occ_sums]
@@ -264,7 +267,8 @@ class CS1(ML):
             return
 
         preds = (np.array(preds).flatten() > 0.5).astype(int)
-        free_channels = [i for i, s in enumerate(preds) if s == 0]
+        free_channels = [i for i, s in enumerate(
+            preds) if channel_state[i] == 0 and s == 0]
         # no channel is free
         if len(free_channels) == 0:
             return
@@ -352,9 +356,12 @@ class CS2(ML):
         if preds is None:
             return
         # if no channel is free
-        if max(preds) <= 0:
+        free_channels = [i for i, s in enumerate(channel_state) if s == 0]
+        if max(preds) <= 0 or len(free_channels) <= 0:
             return
         # select channel of highest idle time
+        max_preds = max([val for i, val in enumerate(
+            preds) if channel_state[i] == 0])
         self.selected_channel = [
-            i for i, val in enumerate(preds) if val == max(preds)][0]
+            i for i, val in enumerate(preds) if val == max_preds][0]
         return self.selected_channel
