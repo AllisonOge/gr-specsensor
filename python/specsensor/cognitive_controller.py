@@ -26,7 +26,7 @@ class cognitive_controller(gr.basic_block):
                                 name="cognitive_controller",
                                 in_sig=None,
                                 out_sig=None)
-
+        cs_method = cs_method.lower()
         if cs_method not in cs_methods:
             raise ValueError(
                 "Channel selection method should be any of the following:", cs_methods)
@@ -77,10 +77,9 @@ class cognitive_controller(gr.basic_block):
         # publish messages to swtich frequency and
         # switch from sensor mode to transmission mode
         if self.log_file:
-            # TODO: optimize logging
-            with open(self.log_file, "w") as f:
+            with open(self.log_file, "a") as f:
                 f.write(
-                    f"Selected channel: {selected_channel} at {datetime.datetime.now()}")
+                    f"Selected channel: {selected_channel} at {datetime.datetime.now()} \n")
 
         PMT_msg = pmt.from_bool(False)
         self.message_port_pub(pmt.intern("trans_mode"), PMT_msg)
