@@ -11,9 +11,11 @@ import pmt
 from gnuradio import gr
 import datetime
 import time
+import sqlite3
 from .cs_methods import *
+from .evaluation_metrics import *
 
-cs_methods = ["random", "next", "prev", "nextstate", "idletime"]
+cs_methods = ["random", "next", "prev", "nextstate", "hoyhtya", "renewaltheory", "idletime"]
 
 
 class cognitive_controller(gr.basic_block):
@@ -21,11 +23,13 @@ class cognitive_controller(gr.basic_block):
     docstring for block cognitive_controller
     """
 
-    def __init__(self, frequencies, cs_method="idletime", model_path=None, log_file=None):
+    def __init__(self, frequencies, db_path, cs_method="idletime", model_path=None, log_file=None):
         gr.basic_block.__init__(self,
                                 name="cognitive_controller",
                                 in_sig=None,
                                 out_sig=None)
+        
+        self.cursor = sqlite3.connect(db_path).cursor()
         cs_method = cs_method.lower()
         if cs_method not in cs_methods:
             raise ValueError(
@@ -36,6 +40,12 @@ class cognitive_controller(gr.basic_block):
 
         if cs_method == "next" or cs_method == "prev":
             self.cs_method = NextOrPreviousChannelSelection(cs_method)
+
+        if cs_method == "hoyhtya":
+            self.cs_method = Hoyhtya(cs_method, self.cursor)
+        
+        if cs_method == "renewaltheory":
+            self.cs_method = RenewalTheory(cs_method, self.cursor)
 
         if cs_method == "nextstate":
             if not model_path:
@@ -50,6 +60,9 @@ class cognitive_controller(gr.basic_block):
 
         self.frequencies = frequencies
         self.log_file = log_file
+
+        # performance metrics
+        self.measure_sr = MeasureSwitchRate(None)
 
         # register input message ports
         self.message_port_register_in(pmt.intern("channel_state"))
@@ -69,7 +82,7 @@ class cognitive_controller(gr.basic_block):
     def algorithm(self, cs):
         # get the channel
         selected_channel = self.cs_method.select_channel(cs)
-
+        self.measure_sr.count_switch_rate(selected_channel)
         # if None
         if selected_channel == None:
             return
@@ -93,6 +106,9 @@ class cognitive_controller(gr.basic_block):
         PMT_msg = pmt.to_pmt(
             dict({"freq": self.frequencies[selected_channel], "constant": 0}))
         self.message_port_pub(pmt.intern("command"), PMT_msg)
+
+    def get_switch_rate(self):
+        return self.measure_sr.get_switch_rate()
 
     def work(self, input_items, output_items):
         return len(input_items[0])

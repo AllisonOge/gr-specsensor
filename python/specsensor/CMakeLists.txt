@@ -26,6 +26,7 @@ GR_PYTHON_INSTALL(
     signal_detector.py
     cs_methods.py
     utils.py
+    evaluation_metrics.py
     cognitive_controller.py
     set_multiply_const_xx.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/specsensor
 )
