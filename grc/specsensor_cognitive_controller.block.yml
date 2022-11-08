@@ -4,8 +4,9 @@ category: 'Spectrum Sensor'
 
 templates:
   imports: from gnuradio import specsensor
-  make: specsensor.cognitive_controller(${frequencies}, ${cs_method}, ${model_path}, ${log_file})
-
+  make: specsensor.cognitive_controller(${frequencies}, ${db_path}, ${cs_method}, ${model_path}, ${log_file})
+  callbacks: 
+  - get_switch_rate()
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
 #     Keys include:
 #     * id (makes the value accessible as keyname, e.g. in the make entry)
@@ -19,9 +20,12 @@ parameters:
 - id: cs_method
   label: Channel Selection Method
   dtype: string
-  options: ['random', 'next', 'prev', 'nextstate', 'idletime']
-  option_labels: ['Random', 'Next', 'Previous', 'Next_State', 'Idletime']
+  options: ['random', 'next', 'prev', 'hoyhtya', 'renewaltheory', 'nextstate', 'idletime']
+  option_labels: ['Random', 'Next', 'Previous', 'Hoyhtya', 'Renewal_theory', 'Next_State', 'Idletime']
   default: 'Idletime'
+- id: db_path
+  label: DB Path
+  dtype: file_open
 - id: model_path
   label: Model Path
   dtype: file_open
