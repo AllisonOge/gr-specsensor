@@ -119,10 +119,7 @@ class RandomChannelSelection(CSMethods):
         if all(channel_state):
             return None
 
-        free_channels = []
-        for i, state in enumerate(channel_state):
-            if int(state) == 0:
-                free_channels.append(i)
+        free_channels = [i for i, state in enumerate(channel_state) if state == 0]
         # stay on selected channel if free
         if self.selected_channel in free_channels:
             return self.selected_channel
@@ -387,9 +384,9 @@ class Hoyhtya(CSMethods):
             idletimes) > 0 else 0 for idletimes in list(map(start_and_idle_time, np.array(dataset).transpose()))]
 
     def select_channel(self, channel_state):
-        self.update_idletimes(channel_state)
         if all(channel_state):
             return
+        self.update_idletimes(channel_state)
         max_idletime = np.max(
             [idletime for i, idletime in self.idle_times if channel_state[i] == 0])
         if max_idletime == 0:
@@ -428,6 +425,7 @@ class RenewalTheory(CSMethods):
     def select_channel(self, channel_state):
         if all(channel_state):
             return
+        self.update_idletimes(channel_state)
         max_idletime = np.max(
             [idletime for i, idletime in self.idletimes if channel_state[i] == 0])
         if max_idletime == 0:
