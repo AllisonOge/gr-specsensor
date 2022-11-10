@@ -17,6 +17,15 @@ class signal_detector(gr.hier_block2):
     A signal detector that determines the state of the channel
     within the sensed band given the signal edges
 
+    Computes the threshold of the energy detector using the formula based on paper [1]
+
+    threshold = noise_pow * (1 + np.sqrt(2/(self.vlen*self.fft_len))*qinv(self.sensitivity))
+
+    This is the threshold formular for a welch periodogram-based energy detector.
+    [1] Martínez, D.M. and Andrade, Á.G., 2013. Performance evaluation of Welch's 
+        periodogram-based energy detection for spectrum sensing. IET Communications, 
+        7(11), pp.1117-1125.
+
     Parameters
     ----------
         fft_len: (int) length of FFT

@@ -118,12 +118,18 @@ class test_stats(gr.sync_block):
 
         # detect signal
         quotient = np.sum(self.signal_edges)
-        test_stats = np.array([np.sum(
-            signal_acc[self.signal_edges[n]*self.fft_len//quotient*n:self.signal_edges[n]*self.fft_len//quotient*(n+1)])
-            for n in range(len(self.signal_edges))])
-        noise = np.array([np.sum(
-            noise_acc[self.signal_edges[n]*self.fft_len//quotient*n:self.signal_edges[n]*self.fft_len//quotient*(n+1)])
-            for n in range(len(self.signal_edges))])
+        test_stats = []
+        noise = []
+        for n, sig_edge in enumerate(self.signal_edges):
+            start_idx = (sig_edge*self.fft_len//quotient)*n
+            stop_idx = (sig_edge*self.fft_len//quotient)*(n+1)
+            test_stats.append(np.sum([(self.fft_len/self.vlen) * p for p in
+                                      signal_acc[start_idx:stop_idx]]))
+            noise.append(
+                np.sum([(self.fft_len/self.vlen) * p for p in noise_acc[start_idx:stop_idx]]))
+        test_stats = np.array(test_stats)
+        noise = np.array(noise)
+
         threshold = self.build_threshold(noise)
         decision = np.array(
             list(map(lambda d: 1 if d == True else 0, test_stats >= threshold)))
