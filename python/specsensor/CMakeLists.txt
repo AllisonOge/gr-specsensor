@@ -28,7 +28,9 @@ GR_PYTHON_INSTALL(
     utils.py
     evaluation_metrics.py
     cognitive_controller.py
-    set_multiply_const_xx.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/specsensor
+    set_multiply_const_xx.py
+    find_interference.py
+    interference_measure.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/specsensor
 )
 
 ########################################################################
@@ -49,3 +51,4 @@ GR_ADD_TEST(qa_test_stats ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_te
 GR_ADD_TEST(qa_signal_detector ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_signal_detector.py)
 GR_ADD_TEST(qa_cognitive_controller ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_cognitive_controller.py)
 GR_ADD_TEST(qa_set_multiply_const_xx ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_set_multiply_const_xx.py)
+GR_ADD_TEST(qa_interference_measure ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_interference_measure.py)
