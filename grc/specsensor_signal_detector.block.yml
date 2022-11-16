@@ -4,7 +4,7 @@ category: 'Spectrum Sensor'
 
 templates:
   imports: from gnuradio import specsensor
-  make: specsensor.signal_detector(${fft_len}, ${vlen}, ${sensitivity}, ${signal_edges}, ${sqlite_path}, ${table_name})
+  make: specsensor.signal_detector(${fft_len}, ${vlen}, ${sensitivity}, ${signal_edges}, ${save}, ${sqlite_path}, ${table_name})
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
 #     Keys include:
@@ -28,13 +28,20 @@ parameters:
 - id: signal_edges
   label: Signal Edges
   dtype: raw
+- id: save
+  label: Save
+  dtype: bool
+  options: [True, False]
+  default: True
 - id: sqlite_path
   label: SQlite Path
   dtype: file_save
+  hide: part
 - id: table_name
   label: Table Name
   dtype: string
   default: Sensor
+  hide: part
 #  Make one 'inputs' list entry per input and one 'outputs' list entry per output.
 #  Keys include:
 #      * label (an identifier for the GUI)
@@ -51,6 +58,11 @@ outputs:
 - label: channel_state
   domain: message
   optional: true
+
+# assert that the sqlite_path is not empty when save is True
+asserts:
+- ${len(signal_edges) > 0}
+- ${(sqlite_path != "" and save) or (sqlite_path == "" and not save)}
 
 #  'file_format' specifies the version of the GRC yml format used in the file
 #  and should usually not be changed.

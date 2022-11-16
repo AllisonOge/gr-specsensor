@@ -39,7 +39,7 @@ class signal_detector(gr.hier_block2):
     ----------
     """
     def __init__(self, fft_len: int, vlen: int, sensitivity: float, 
-                    signal_edges: tuple, sqlite_path: str, table_name: str="Sensor"):
+                    signal_edges: tuple, save: bool, sqlite_path: str="", table_name: str="Sensor"):
         gr.hier_block2.__init__(self,
             "signal_detector",
             gr.io_signature(1, 1, gr.sizeof_gr_complex*1),  # Input signature
@@ -59,7 +59,7 @@ class signal_detector(gr.hier_block2):
         self.blocks_s2v_1 = blocks.stream_to_vector(gr.sizeof_gr_complex*1, fft_len)
         self.analog_noise_source = analog.noise_source_c(analog.GR_GAUSSIAN, 1, 0)
         self.test_stats = test_stats(fft_len, vlen, sensitivity, 
-                                            signal_edges, sqlite_path, table_name)
+                                            signal_edges, save, sqlite_path, table_name)
 
         # Define blocks and connect them
         self.connect(self, (self.blocks_s2v_0, 0))

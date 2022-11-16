@@ -34,7 +34,7 @@ class test_stats(gr.sync_block):
     """
 
     def __init__(self, fft_len: int, vlen: int, sensitivity: float,
-                 signal_edges: tuple, sqlite_path: str, table_name: str):
+                 signal_edges: tuple, save: bool, sqlite_path: str, table_name: str):
 
         gr.sync_block.__init__(self,
                                name="test_stats",
@@ -43,6 +43,7 @@ class test_stats(gr.sync_block):
                                out_sig=None)
 
         self.signal_edges = signal_edges
+        self.save = save
         self.fft_len = fft_len
         self.vlen = vlen
         self.sensitivity = sensitivity
@@ -101,7 +102,7 @@ class test_stats(gr.sync_block):
             (1 + np.sqrt(2/(self.vlen*self.fft_len))*qinv(self.sensitivity))
         return threshold
 
-    def save_sensor_values(self):
+    def get_sensor_values(self):
         signal_acc = np.array([])
         noise_acc = np.array([])
 
@@ -134,36 +135,40 @@ class test_stats(gr.sync_block):
         decision = np.array(
             list(map(lambda d: 1 if d == True else 0, test_stats >= threshold)))
 
-        if self.first_run:
-            self.connect_client()
-            self.create_table()
-            self.first_run = False
+        timestamp = datetime.datetime.now()
+        
+        if self.save:
 
-        # save the decision
-        channels = ""
-        placeholders = ""
-        for i in range(1, 1+len(self.signal_edges)):
-            if i < len(self.signal_edges):
-                channels += f"chan_{i}, "
-                placeholders += "?, "
-            else:
-                channels += f"chan_{i}"
-                placeholders += "?"
+            if self.first_run:
+                self.connect_client()
+                self.create_table()
+                self.first_run = False
+
+            # save the decision
+            channels = ""
+            placeholders = ""
+            for i in range(1, 1+len(self.signal_edges)):
+                if i < len(self.signal_edges):
+                    channels += f"chan_{i}, "
+                    placeholders += "?, "
+                else:
+                    channels += f"chan_{i}"
+                    placeholders += "?"
+
+            try:
+                query = f"""insert into {self.table_name} ({channels}, created_at) values ({placeholders}, ?)"""
+                self.cursor.execute(query, [*list(map(int, decision)), timestamp])
+                self.connect.commit()
+            except Exception as err:
+                raise err
 
         # publish message
-        timestamp = datetime.datetime.now()
         message = {
             str(timestamp): list(map(int, decision))
         }
         PMT_msg = pmt.to_pmt(message)
         self.message_port_pub(pmt.intern(self.message_port_name), PMT_msg)
 
-        try:
-            query = f"""insert into {self.table_name} ({channels}, created_at) values ({placeholders}, ?)"""
-            self.cursor.execute(query, [*list(map(int, decision)), timestamp])
-            self.connect.commit()
-        except Exception as err:
-            raise err
 
     def work(self, input_items, output_items):
         in0 = input_items[0]
@@ -179,7 +184,7 @@ class test_stats(gr.sync_block):
 
         if self.acc_pointer == self.vlen:
 
-            self.save_sensor_values()
+            self.get_sensor_values()
             self.acc_pointer = 0
 
         return len(input_items[0]) + len(input_items[1])
