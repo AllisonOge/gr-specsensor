@@ -69,7 +69,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    amp: '0'
+    amp: '1'
     comment: ''
     freq: samp_rate/4
     maxoutbuf: '0'
@@ -144,7 +144,7 @@ blocks:
     coordinate: [328, 240.0]
     rotation: 0
     state: true
-- name: blocks_message_debug_1
+- name: blocks_message_debug_0
   id: blocks_message_debug
   parameters:
     affinity: ''
@@ -155,7 +155,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [976, 328.0]
+    coordinate: [952, 264.0]
     rotation: 0
     state: true
 - name: qtgui_freq_sink_x_0
@@ -236,7 +236,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [592, 164.0]
+    coordinate: [536, 84.0]
     rotation: 0
     state: true
 - name: specsensor_signal_detector_0
@@ -257,7 +257,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [600, 268.0]
+    coordinate: [600, 212.0]
     rotation: 0
     state: true
 
@@ -268,7 +268,7 @@ connections:
 - [blocks_add_xx_0, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_add_xx_0, '0', specsensor_signal_detector_0, '0']
 - [blocks_add_xx_1, '0', blocks_add_xx_0, '0']
-- [specsensor_signal_detector_0, channel_state, blocks_message_debug_1, print]
+- [specsensor_signal_detector_0, channel_state, blocks_message_debug_0, print]
 
 metadata:
   file_format: 1
