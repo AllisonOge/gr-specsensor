@@ -104,7 +104,7 @@ class cognitive_controller(gr.basic_block):
         PMT_msg = pmt.from_bool(True)
         self.message_port_pub(pmt.intern("trans_mode"), PMT_msg)
         PMT_msg = pmt.to_pmt(
-            dict({"freq": self.frequencies[selected_channel], "constant": 0}))
+            dict({"constant": 0}))
         self.message_port_pub(pmt.intern("command"), PMT_msg)
 
     def get_switch_rate(self):

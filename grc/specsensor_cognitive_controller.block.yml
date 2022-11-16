@@ -26,12 +26,15 @@ parameters:
 - id: db_path
   label: DB Path
   dtype: file_open
+  hide: part
 - id: model_path
   label: Model Path
   dtype: file_open
+  hide: part
 - id: log_file
   label: Log File
   dtype: file_save
+  hide: part
 #  Make one 'inputs' list entry per input and one 'outputs' list entry per output.
 #  Keys include:
 #      * label (an identifier for the GUI)
@@ -51,6 +54,9 @@ outputs:
 - label: command
   domain: message
   optional: true
+
+asserts:
+- ${(cs_method in ['random', 'next', 'prev', 'hoyhtya', 'renewaltheory']) or (cs_method in ["nextstate", "idletime"] and model_path is not None)}
 
 #  'file_format' specifies the version of the GRC yml format used in the file
 #  and should usually not be changed.
