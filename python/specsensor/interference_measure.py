@@ -41,4 +41,4 @@ class interference_measure(gr.hier_block2):
                          (self.specsensor_fi, "in1"))
 
     def get_interference(self):
-        self.specsensor_fi.get_interference()
+        return self.specsensor_fi.get_interference()

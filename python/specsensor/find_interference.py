@@ -50,14 +50,17 @@ class find_interference(gr.basic_block):
     def find_interference(self):
         # [0, 0, 1, 1] and [1, 0, 0, 0] == no interference
         # [1, 0, 1, 1] and [1, 0, 0, 0] == interference
-        for i, val in enumerate(self.channel_state1):
-            if val == self.channel_state0[i]:
-                self.interference += 1
         self.count_calls += 1
+        for i, val in enumerate(self.channel_state0):
+            if val == self.channel_state1[i]:
+                self.interference += 1
         
 
     def get_interference(self):
-        return self.interference / self.count_calls
+        if self.count_calls > 0:
+            return self.interference / self.count_calls
+        else:
+            return 0
 
     def work(self, input_items, output_items):
         return len(input_items[0])
