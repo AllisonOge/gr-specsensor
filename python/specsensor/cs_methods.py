@@ -119,7 +119,8 @@ class RandomChannelSelection(CSMethods):
         if all(channel_state):
             return None
 
-        free_channels = [i for i, state in enumerate(channel_state) if state == 0]
+        free_channels = [i for i, state in enumerate(
+            channel_state) if state == 0]
         # stay on selected channel if free
         if self.selected_channel in free_channels:
             return self.selected_channel
@@ -350,19 +351,26 @@ class CS2(ML):
             return
         # prepare the data
         self.prepare_dataset()
+
+        if all(channel_state):
+            return
         # get predictions
         preds = self.get_prediction(channel_state)
         preds = np.array(preds).flatten()
 
         if preds is None:
             return
-        # if no channel is free
+
+        # find free channels
         free_channels = [i for i, s in enumerate(channel_state) if s == 0]
-        if max(preds) <= 0 or len(free_channels) <= 0:
-            return
-        # select channel of highest idle time
+        # maintain the selected channel if free
+        if self.selected_channel in free_channels:
+            return self.selected_channel
+
+        # find channel with highest idle time
         max_preds = max([val for i, val in enumerate(
             preds) if channel_state[i] == 0])
+
         self.selected_channel = [
             i for i, val in enumerate(preds) if val == max_preds][0]
         return self.selected_channel
@@ -405,7 +413,7 @@ class RenewalTheory(CSMethods):
             bit) is not str and i != 0] for row in self.cursor.execute(f"""select * from {self.name}""").fetchall()]
         mean_ONOFF = [[np.mean(times) if len(times) > 0 else 0 for times in channel] for channel in list(
             map(on_and_off_time, np.array(dataset).transpose()))]
-        
+
         idletimes = []
         for i, (on, off) in enumerate(mean_ONOFF):
             lambda_on = np.ma.masked_values(on, 0)**-1
@@ -420,7 +428,8 @@ class RenewalTheory(CSMethods):
                     np.exp(-1*(lambda_on + lambda_off))
             idletimes.append(prob * np.ma.masked_values(off, 0)**-1)
 
-        self.idletimes = [i if np.ma.is_masked(i) is False else 0 for i in idletimes]
+        self.idletimes = [i if np.ma.is_masked(
+            i) is False else 0 for i in idletimes]
 
     def select_channel(self, channel_state):
         if all(channel_state):
