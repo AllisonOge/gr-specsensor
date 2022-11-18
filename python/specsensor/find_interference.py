@@ -52,7 +52,7 @@ class find_interference(gr.basic_block):
         # [1, 0, 1, 1] and [1, 0, 0, 0] == interference
         self.count_calls += 1
         for i, val in enumerate(self.channel_state0):
-            if val == self.channel_state1[i]:
+            if val == 1 and val == self.channel_state1[i]:
                 self.interference += 1
         
 
