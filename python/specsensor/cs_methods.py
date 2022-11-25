@@ -379,22 +379,33 @@ class CS2(ML):
 class Hoyhtya(CSMethods):
     """Implement Hoyhtya channel selection algorithm"""
 
-    def __init__(self, name, cursor) -> None:
+    def __init__(self, name, db_path) -> None:
         CSMethods.__init__(self, name)
         self.idle_times = []
-        self.cursor = cursor
+        self.db_path = db_path
 
-    def update_idletimes(self, channel_state):
+    def update_idletimes(self):
         """Update the median idletimes of the channels"""
+        con = sqlite3.connect(self.db_path)
+        cursor = con.cursor()
+        try:
+            dataset = cursor.execute(
+                f"""select * from {self.name}""").fetchall()
+        except sqlite3.OperationalError:
+            return
+        if not len(dataset) > 0:
+            return
         dataset = [[bit for i, bit in enumerate(row) if type(
-            bit) is not str and i != 0] for row in self.cursor.execute(f"""select * from {self.name}""").fetchall()]
+            bit) is not str and i != 0] for row in dataset]
         self.idle_times = [np.median([idletime for s, idletime in idletimes]) if len(
             idletimes) > 0 else 0 for idletimes in list(map(start_and_idle_time, np.array(dataset).transpose()))]
+        return True
 
     def select_channel(self, channel_state):
         if all(channel_state):
             return
-        self.update_idletimes(channel_state)
+        if not self.update_idletimes():
+            return
         max_idletime = np.max(
             [idletime for i, idletime in self.idle_times if channel_state[i] == 0])
         if max_idletime == 0:
@@ -403,16 +414,26 @@ class Hoyhtya(CSMethods):
 
 
 class RenewalTheory(CSMethods):
-    def __init__(self, name, cursor):
+    def __init__(self, name, db_path):
         CSMethods.__init__(self, name)
         self.idletimes = []
-        self.cursor = cursor
+        self.db_path = db_path
 
     def update_idletimes(self, channel_state):
+        con = sqlite3.connect(self.db_path)
+        cursor = con.cursor()
+        try:
+            dataset = cursor.execute(
+                f"""select * from {self.name}""").fetchall()
+        except sqlite3.OperationalError:
+            return
+        if not len(dataset) > 0:
+            return
         dataset = [[bit for i, bit in enumerate(row) if type(
-            bit) is not str and i != 0] for row in self.cursor.execute(f"""select * from {self.name}""").fetchall()]
-        mean_ONOFF = [[np.mean(times) if len(times) > 0 else 0 for times in channel] for channel in list(
+            bit) is not str and i != 0] for row in dataset]
+        mean_ONOFF = [[np.mean(times) if len(times) > 0 else 0.0 for times in channel] for channel in list(
             map(on_and_off_time, np.array(dataset).transpose()))]
+        con.close()
 
         idletimes = []
         for i, (on, off) in enumerate(mean_ONOFF):
@@ -429,12 +450,14 @@ class RenewalTheory(CSMethods):
             idletimes.append(prob * np.ma.masked_values(off, 0)**-1)
 
         self.idletimes = [i if np.ma.is_masked(
-            i) is False else 0 for i in idletimes]
+            i) is False else 0.0 for i in idletimes]
+        return True
 
     def select_channel(self, channel_state):
         if all(channel_state):
             return
-        self.update_idletimes(channel_state)
+        if not self.update_idletimes(channel_state):
+            return
         max_idletime = np.max(
             [idletime for i, idletime in self.idletimes if channel_state[i] == 0])
         if max_idletime == 0:
