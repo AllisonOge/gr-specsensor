@@ -80,7 +80,7 @@ class cognitive_controller(gr.basic_block):
         if selected_channel == None:
             return
         # instruct physical layer
-        # publish messages to swtich frequency and
+        # publish messages to switch frequency and
         # switch from sensor mode to transmission mode
         if self.log_file:
             with open(self.log_file, "a") as f:
