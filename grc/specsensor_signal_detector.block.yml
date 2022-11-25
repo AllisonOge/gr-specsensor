@@ -62,7 +62,7 @@ outputs:
 # assert that the sqlite_path is not empty when save is True
 asserts:
 - ${len(signal_edges) > 0}
-- ${(sqlite_path != "" and save) or (sqlite_path == "" and not save)}
+- ${(sqlite_path) or (sqlite_path == "" and not save)}
 
 #  'file_format' specifies the version of the GRC yml format used in the file
 #  and should usually not be changed.
