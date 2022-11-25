@@ -15,7 +15,7 @@ import sqlite3
 from .cs_methods import *
 from .evaluation_metrics import *
 
-cs_methods = ["random", "next", "prev", "nextstate", "hoyhtya", "renewaltheory", "idletime"]
+cs_methods = ["random", "next", "prev", "hoyhtya", "renewaltheory", "proposed"]
 
 
 class cognitive_controller(gr.basic_block):
@@ -23,13 +23,12 @@ class cognitive_controller(gr.basic_block):
     docstring for block cognitive_controller
     """
 
-    def __init__(self, frequencies, db_path, cs_method="idletime", model_path=None, log_file=None):
+    def __init__(self, frequencies, db_path, cs_method="proposed", model_path=None, log_file=None):
         gr.basic_block.__init__(self,
                                 name="cognitive_controller",
                                 in_sig=None,
                                 out_sig=None)
         
-        self.cursor = sqlite3.connect(db_path).cursor()
         cs_method = cs_method.lower()
         if cs_method not in cs_methods:
             raise ValueError(
@@ -42,21 +41,15 @@ class cognitive_controller(gr.basic_block):
             self.cs_method = NextOrPreviousChannelSelection(cs_method)
 
         if cs_method == "hoyhtya":
-            self.cs_method = Hoyhtya(cs_method, self.cursor)
+            self.cs_method = Hoyhtya(cs_method, db_path)
         
         if cs_method == "renewaltheory":
-            self.cs_method = RenewalTheory(cs_method, self.cursor)
+            self.cs_method = RenewalTheory(cs_method, db_path)
 
-        if cs_method == "nextstate":
+        if cs_method == "proposed":
             if not model_path:
                 raise ValueError("model path must be provided")
-            self.cs_method = CS1(cs_method, nchannels=len(
-                frequencies), model_path=model_path)
-
-        if cs_method == "idletime":
-            if not model_path:
-                raise ValueError("model path must be provided")
-            self.cs_method = CS2(cs_method, model_path=model_path)
+            self.cs_method = CS(cs_method, db_path, model_path=model_path)
 
         self.frequencies = frequencies
         self.log_file = log_file

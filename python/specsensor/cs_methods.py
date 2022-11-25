@@ -228,87 +228,8 @@ class NextOrPreviousChannelSelection(CSMethods):
         self.selected_channel = selected_channel
 
 
-class CS1(ML):
-    """Channel Selection Algorithm 1
-
-       Make inference on the next state of the channel and selects a channel 
-       with the least occupancy
-
-       Attributes
-       ----------
-        occ_sum: (list)
-        occupancies: (list)
-        counter: (int)
-    """
-
-    def __init__(self, name: str, nchannels: int, window_size: int = 10, model_path=...):
-        super().__init__(name, window_size, model_path)
-        self.occ_sums = []
-        self.occupancies = [0, ] * nchannels
-        self.counter = 0
-
-    def update_dataset(self, channel_state):
-        self.dataset.append(channel_state)
-        self.occupancies = self.update_occupancies(channel_state)
-
-    def update_occupancies(self, channel_state):
-        """Compute the latest occupancies of the channel
-
-           Steps:
-                update the sums of states and increment counter
-                new occupancy = sum of states / counter
-
-            Parameters
-            ----------
-
-        """
-        if len(self.occ_sums) <= 0:
-            self.occ_sums = channel_state
-        else:
-            self.occ_sums = [r+channel_state[i]
-                             for i, r in enumerate(self.occ_sums)]
-        self.counter += 1
-        return [o / self.counter for o in self.occ_sums]
-
-    def select_channel(self, channel_state):
-        """Make predictions and select the channel with the least occupancy
-
-           Parameters
-           ----------
-                channel_state: (1-D array-like) state of the channel
-
-            Returns
-            -------
-                None or selected_channel
-        """
-        channel_state = list(channel_state)
-        # get predictions
-        preds = self.get_prediction(channel_state)
-        if preds is None:
-            return
-
-        preds = (np.array(preds).flatten() > 0.5).astype(int)
-        free_channels = [i for i, s in enumerate(
-            preds) if channel_state[i] == 0 and s == 0]
-        # no channel is free
-        if len(free_channels) == 0:
-            return
-        if self.selected_channel in free_channels:
-            return self.selected_channel
-        # only one channel
-        if len(free_channels) == 1:
-            self.selected_channel = free_channels[0]
-            return self.selected_channel
-        # select the least occupancy
-        latest_occ = [i for i, _ in enumerate(
-            self.occupancies) if i in free_channels]
-        self.selected_channel = [i for i, val in enumerate(
-            latest_occ) if val == min(latest_occ)][0]
-        return self.selected_channel
-
-
-class CS2(ML):
-    """Channel Selection Algorithm 2
+class CS(ML):
+    """Channel Selection Algorithm
 
        Make inference on the idle time of the channel 
        and select channel with highest idle time
