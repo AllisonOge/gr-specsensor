@@ -341,7 +341,7 @@ class Hoyhtya(CSMethods):
         if not self.update_idletimes():
             return
         max_idletime = np.max(
-            [idletime for i, idletime in self.idle_times if channel_state[i] == 0])
+            [idletime for i, idletime in enumerate(self.idle_times) if channel_state[i] == 0])
         if max_idletime == 0:
             return
         return [i for i, idletime in enumerate(self.idle_times) if idletime == max_idletime][0]
@@ -393,7 +393,7 @@ class RenewalTheory(CSMethods):
         if not self.update_idletimes(channel_state):
             return
         max_idletime = np.max(
-            [idletime for i, idletime in self.idletimes if channel_state[i] == 0])
+            [idletime for i, idletime in enumerate(self.idletimes) if channel_state[i] == 0])
         if max_idletime == 0:
             return
         return [i for i, idletime in enumerate(self.idletimes) if idletime == max_idletime][0]
