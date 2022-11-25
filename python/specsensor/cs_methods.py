@@ -2,6 +2,7 @@ import random
 import tensorflow.lite as tflite
 import os
 import numpy as np
+import sqlite3
 from .utils import start_and_idle_time, on_and_off_time
 
 
@@ -29,7 +30,8 @@ class ML(CSMethods):
 
     """
 
-    def __init__(self, name: str, window_size: int = 10, model_path: str = os.path.abspath("./models/model.tflite")):
+    def __init__(self, name: str, db_path: str, window_size: int = 10, model_path: str = os.path.abspath("./models/model.tflite")):
+        self.db_path = db_path
         self.dataset: list = []
         self.window_size: int = window_size
         CSMethods.__init__(self, name)
@@ -37,18 +39,34 @@ class ML(CSMethods):
         # allocate memory
         self.model_interpreter.allocate_tensors()
 
-    def update_dataset(self, channel_state: list) -> None:
-        """Update the dataset buffer
+    def update_dataset(self) -> None or True:
+        """Read database for updated data
 
            Parameters
            ----------
-                channel_state: (1-D Array-like) state of the channel
+                None
 
             Return 
             ------
-                None
+                None or True
         """
-        self.dataset.append(channel_state)
+        con = sqlite3.connect(self.db_path)
+        cursor = con.cursor()
+        try:
+            dataset = cursor.execute(
+                f"""select * from (select * from {self.name} order by id desc limit 10) order by id asc""").fetchall()
+        except sqlite3.OperationalError:
+            return
+        if not len(dataset) > 0:
+            return
+        self.dataset = [[bit for i, bit in enumerate(row) if type(
+            bit) is not str and i != 0] for row in dataset]
+        con.close()
+        return True
+
+    def prepare_dataset(self) -> None:
+        """Prepare data"""
+        pass
 
     def get_prediction(self, channel_state) -> None or dict:
         """Prepare data and invoke model inference
@@ -62,12 +80,13 @@ class ML(CSMethods):
                 None or predictions
         """
         # update dataset and reshape to window size
-        self.update_dataset(channel_state)
-
+        if self.update_dataset() is None:
+            return
         if not len(self.dataset) >= self.window_size:
             return
 
-        self.dataset = self.dataset[:self.window_size]
+        self.prepare_dataset()
+        self.dataset = self.dataset[len(self.dataset)-self.window_size:]
 
         # set input tensor for the model
         X = np.array([r for r in self.dataset], dtype=np.float32).reshape(
@@ -303,7 +322,7 @@ class CS2(ML):
 
         Methods
         -------
-            update_dataset(channel_state)
+            update_dataset()
 
     """
 
@@ -346,20 +365,14 @@ class CS2(ML):
 
         """
         channel_state = list(channel_state)
-        self.update_dataset(channel_state)
-        if not len(self.dataset) >= self.window_size:
-            return
-        # prepare the data
-        self.prepare_dataset()
-
         if all(channel_state):
             return
         # get predictions
         preds = self.get_prediction(channel_state)
-        preds = np.array(preds).flatten()
-
         if preds is None:
             return
+
+        preds = np.array(preds).flatten()
 
         # find free channels
         free_channels = [i for i, s in enumerate(channel_state) if s == 0]
