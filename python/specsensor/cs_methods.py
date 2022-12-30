@@ -3,7 +3,7 @@ import tensorflow.lite as tflite
 import os
 import numpy as np
 import sqlite3
-from .utils import start_and_idle_time, on_and_off_time
+from .utils import *
 
 
 class CSMethods:
@@ -30,7 +30,7 @@ class ML(CSMethods):
 
     """
 
-    def __init__(self, name: str, db_path: str, window_size: int = 10, model_path: str = os.path.abspath("./models/model.tflite")):
+    def __init__(self, name: str, db_path: str, window_size: int = 25, model_path: str = os.path.abspath("./models/model.tflite")):
         self.db_path = db_path
         self.dataset: list = []
         self.window_size: int = window_size
@@ -249,32 +249,6 @@ class CS(ML):
 
     """
 
-    def prepare_dataset(self):
-        """ Compute the idletimes of the channel states sequence
-            stored in dataset and updates it
-
-            This method transforms the bits of ones and zeros to
-            the idle time at each time slot e.g., a sequence of 
-            [1, 0, 0, 0, 1, 0, 1] has the idle time representation
-            of [0, 3, 2, 1, 0, 1, 0]
-
-            Given the channel states tensor it transforms it to the
-            corresponding idle times
-
-            Parameters
-            ----------
-              None
-
-            Returns
-            -------
-              None
-        """
-        idle_times = []
-        for i in range(len(self.dataset)):
-            idle_times.append([j[0][1] if len(j) > 0 and i+j[0][0] <= i else 0
-                               for j in list(map(start_and_idle_time, np.transpose(self.dataset[i:])))])
-        self.dataset = [r for r in idle_times]
-
     def select_channel(self, channel_state) -> None or int:
         """Select a channel with highest idle time prediction
 
@@ -324,6 +298,8 @@ class Hoyhtya(CSMethods):
         """Update the median idletimes of the channels"""
         con = sqlite3.connect(self.db_path)
         cursor = con.cursor()
+
+        # get latest sensor data
         try:
             dataset = cursor.execute(
                 f"""select * from {self.name}""").fetchall()
@@ -336,7 +312,7 @@ class Hoyhtya(CSMethods):
         dataset = [[bit for i, bit in enumerate(row) if type(
             bit) is not str and i != 0] for row in dataset]
         self.idle_times = [np.median([idletime for s, idletime in idletimes]) if len(
-            idletimes) > 0 else 0 for idletimes in list(map(start_and_idle_time, np.array(dataset).transpose()))]
+            idletimes) > 0 else 0 for idletimes in list(map(start_and_off_time, np.array(dataset).transpose()))]
         return True
 
     def select_channel(self, channel_state):
@@ -373,7 +349,6 @@ class RenewalTheory(CSMethods):
             bit) is not str and i != 0] for row in dataset]
         mean_ONOFF = [[np.mean(times) if len(times) > 0 else 0.0 for times in channel] for channel in list(
             map(on_and_off_time, np.array(dataset).transpose()))]
-        con.close()
 
         idletimes = []
         for i, (on, off) in enumerate(mean_ONOFF):

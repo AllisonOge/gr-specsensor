@@ -11,7 +11,6 @@ import pmt
 from gnuradio import gr
 import datetime
 import time
-import sqlite3
 from .cs_methods import *
 from .evaluation_metrics import *
 
@@ -28,7 +27,7 @@ class cognitive_controller(gr.basic_block):
                                 name="cognitive_controller",
                                 in_sig=None,
                                 out_sig=None)
-        
+
         cs_method = cs_method.lower()
         if cs_method not in cs_methods:
             raise ValueError(
@@ -42,7 +41,7 @@ class cognitive_controller(gr.basic_block):
 
         if cs_method == "hoyhtya":
             self.cs_method = Hoyhtya(cs_method, db_path)
-        
+
         if cs_method == "renewaltheory":
             self.cs_method = RenewalTheory(cs_method, db_path)
 
@@ -79,14 +78,15 @@ class cognitive_controller(gr.basic_block):
         # if None
         if selected_channel == None:
             return
-        # instruct physical layer
-        # publish messages to switch frequency and
-        # switch from sensor mode to transmission mode
+        
         if self.log_file:
             with open(self.log_file, "a") as f:
                 f.write(
                     f"Selected channel: {selected_channel} at {datetime.datetime.now()} \n")
 
+        # instruct physical layer
+        # publish messages to switch frequency and
+        # switch from sensor mode to transmission mode
         PMT_msg = pmt.from_bool(False)
         self.message_port_pub(pmt.intern("trans_mode"), PMT_msg)
         PMT_msg = pmt.to_pmt(
