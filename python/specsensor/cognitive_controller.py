@@ -100,6 +100,11 @@ class cognitive_controller(gr.basic_block):
             dict({"constant": 0}))
         self.message_port_pub(pmt.intern("command"), PMT_msg)
 
+        # flush message queue
+        if not self.cs_method.name in ["random", "next"]:
+            while not self.delete_head_nowait(pmt.intern("channel_state")) == None:
+                pass
+
     def get_switch_rate(self):
         return self.measure_sr.get_switch_rate()
 
