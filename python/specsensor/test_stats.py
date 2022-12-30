@@ -160,7 +160,7 @@ class test_stats(gr.sync_block):
                 self.cursor.execute(query, [*list(map(int, decision)), timestamp])
                 self.connect.commit()
             except Exception as err:
-                raise err
+                pass
 
         # publish message
         message = {

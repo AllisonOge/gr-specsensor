@@ -54,8 +54,10 @@ class ML(CSMethods):
         cursor = con.cursor()
         try:
             dataset = cursor.execute(
-                f"""select * from (select * from {self.name} order by id desc limit 10) order by id asc""").fetchall()
-        except sqlite3.OperationalError:
+                f"""select * from (select * from {self.name} order by id desc limit 25) order by id asc""").fetchall()
+            con.close()
+        except:
+            con.close()
             return
         if not len(dataset) > 0:
             return
@@ -325,8 +327,10 @@ class Hoyhtya(CSMethods):
         try:
             dataset = cursor.execute(
                 f"""select * from {self.name}""").fetchall()
-        except sqlite3.OperationalError:
-            return
+            con.close()
+        except:
+            con.close()
+            return  True if len(self.idle_times) > 0 else False
         if not len(dataset) > 0:
             return
         dataset = [[bit for i, bit in enumerate(row) if type(
@@ -359,8 +363,10 @@ class RenewalTheory(CSMethods):
         try:
             dataset = cursor.execute(
                 f"""select * from {self.name}""").fetchall()
-        except sqlite3.OperationalError:
-            return
+            con.close()
+        except:
+            con.close()
+            return True if len(self.idletimes) > 0 else False
         if not len(dataset) > 0:
             return
         dataset = [[bit for i, bit in enumerate(row) if type(
